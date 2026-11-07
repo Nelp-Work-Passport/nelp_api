@@ -220,6 +220,30 @@ def test_health_and_docs(client):
         assert path in paths, path
 
 
+def test_production_refuses_sqlite():
+    from pydantic import ValidationError
+
+    from app.config import Settings
+
+    secrets = dict.fromkeys(("secret_key", "payment_webhook_secret", "sms_dlr_secret"), "x" * 40)
+    with pytest.raises(ValidationError, match="PostgreSQL"):
+        Settings(environment="production", database_url="sqlite:///./nelp.db", **secrets)
+    Settings(environment="production", database_url="postgresql://u:p@h/d", **secrets)
+
+
+def test_root_answers_for_the_default_readiness_path(client):
+    assert client.get("/").status_code == 200
+
+
+def test_reseeding_leaves_fresh_slots_alone(db):
+    from app.models import AvailabilitySlot
+
+    seed(db)
+    ids = {slot.id for slot in db.query(AvailabilitySlot)}
+    seed(db)
+    assert {slot.id for slot in db.query(AvailabilitySlot)} == ids
+
+
 def test_production_refuses_dev_secrets():
     from pydantic import ValidationError
 

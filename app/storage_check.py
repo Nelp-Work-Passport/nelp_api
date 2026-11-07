@@ -11,6 +11,7 @@ import uuid
 
 from app.adapters import storage
 from app.config import get_settings
+from app.errors import AppError
 
 
 def _status(url: str) -> tuple[int, bytes]:
@@ -30,7 +31,11 @@ def main() -> int:
     store = storage.get_storage()
     key = f"healthcheck/{uuid.uuid4()}.txt"
     body = b"nelp storage check"
-    store.put(key, body, "text/plain")
+    try:
+        store.put(key, body, "text/plain")
+    except AppError as exc:
+        print(f"Upload: FAILED ({exc.__cause__})")
+        return 1
     print("Upload: ok")
     failed = False
     try:

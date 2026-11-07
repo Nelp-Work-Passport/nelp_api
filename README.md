@@ -155,8 +155,7 @@ with `openssl rand -hex 32`, and set `CORS_ORIGINS` and `PUBLIC_BASE_URL` to the
 delete against the real bucket. Until they are set, uploads answer 503 and everything
 else works.
 
-**Deploy.** Build the `Dockerfile`, which listens on `$PORT`. RumptyCloud's own setup still
-needs checking against its docs.
+**Deploy.** Follow [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Known limits
 
@@ -180,5 +179,6 @@ needs checking against its docs.
   the upload. It is not provider-backed identity verification.
 - **Uploads are fully received before the size check.** Set a request size limit on the
   hosting proxy too.
+- **There are no managed database backups** on RumptyCloud. See [DEPLOYMENT.md](DEPLOYMENT.md).
 - **Trust scores are not proof.** They summarise past feedback, and a phone badge is not an
   identity check. The UI should say so.

@@ -153,11 +153,16 @@ def _history(db, rider: User, areas, customers, star_counts) -> None:
 
 
 def _refresh_slots(db: Session, rider_id: uuid.UUID, area_id: uuid.UUID) -> None:
-    open_slots = db.scalars(
-        select(AvailabilitySlot).where(
-            AvailabilitySlot.rider_id == rider_id, AvailabilitySlot.status == SlotStatus.OPEN
+    open_slots = list(
+        db.scalars(
+            select(AvailabilitySlot).where(
+                AvailabilitySlot.rider_id == rider_id, AvailabilitySlot.status == SlotStatus.OPEN
+            )
         )
     )
+    # Free-plan apps restart whenever they wake, so most starts have nothing to do.
+    if any(slot.ends_at > utcnow() + timedelta(days=3) for slot in open_slots):
+        return
     for slot in open_slots:
         slot.status = SlotStatus.CLOSED
     today = utcnow().astimezone(NAIROBI).date()

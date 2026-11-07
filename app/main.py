@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.db import SessionLocal, create_tables
+from app.db import SessionLocal, create_tables, startup_lock
 from app.errors import AppError, app_error_handler
 from app.routers import admin, auth, bookings, media, meta, misc, riders
 from app.seed import seed
@@ -17,10 +17,11 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
-    create_tables()
-    if settings.seed_on_startup:
-        with SessionLocal() as db:
-            seed(db)
+    with startup_lock():
+        create_tables()
+        if settings.seed_on_startup:
+            with SessionLocal() as db:
+                seed(db)
     if settings.sms_provider == "demo":
         logger.warning("SMS demo inbox is on: anyone can read codes at /api/demo/inbox")
     yield

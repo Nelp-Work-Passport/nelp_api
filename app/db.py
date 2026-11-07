@@ -1,14 +1,17 @@
 """Engine, session and the shared timestamp type."""
 
 from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, create_engine, event
+from sqlalchemy import DateTime, create_engine, event, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.types import TypeDecorator
 
 from app.config import get_settings
+
+STARTUP_LOCK_KEY = 7_274_301
 
 
 class UtcDateTime(TypeDecorator):
@@ -50,7 +53,15 @@ def _make_engine() -> Engine:
             connection.execute("PRAGMA foreign_keys=ON")
 
         return engine
-    return create_engine(url, pool_pre_ping=True)
+    # A small pool, reused: the public endpoint limits connections per IP.
+    return create_engine(
+        url,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=5,
+        pool_recycle=300,
+        connect_args={"connect_timeout": 10},
+    )
 
 
 engine = _make_engine()
@@ -66,3 +77,17 @@ def create_tables() -> None:
     import app.models  # noqa: F401  (registers the tables on Base.metadata)
 
     Base.metadata.create_all(engine)
+
+
+@contextmanager
+def startup_lock() -> Iterator[None]:
+    """Old and new containers overlap during a deploy, so startup work takes turns."""
+    if engine.dialect.name != "postgresql":
+        yield
+        return
+    with engine.connect() as connection:
+        connection.execute(text("SELECT pg_advisory_lock(:key)"), {"key": STARTUP_LOCK_KEY})
+        try:
+            yield
+        finally:
+            connection.execute(text("SELECT pg_advisory_unlock(:key)"), {"key": STARTUP_LOCK_KEY})

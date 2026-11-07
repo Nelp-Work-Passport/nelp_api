@@ -15,6 +15,12 @@ from app.services import fares
 router = APIRouter(tags=["meta"])
 
 
+@router.get("/", include_in_schema=False)
+def root():
+    """RumptyCloud's default readiness path, which must answer without login."""
+    return {"service": "nelp-api", "docs": "/docs", "health": "/health"}
+
+
 @router.get("/health")
 def health(db: Db):
     try:

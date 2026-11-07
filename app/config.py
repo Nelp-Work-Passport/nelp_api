@@ -70,6 +70,9 @@ class Settings(BaseSettings):
             for name in ("secret_key", "payment_webhook_secret", "sms_dlr_secret"):
                 if getattr(self, name) == DEV_SECRET:
                     raise ValueError(f"{name.upper()} must be set in production")
+            if self.database_url.startswith("sqlite"):
+                # The deployment filesystem is wiped on every deploy.
+                raise ValueError("DATABASE_URL must point to PostgreSQL in production")
         return self
 
     @property
