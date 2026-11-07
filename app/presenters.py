@@ -145,7 +145,10 @@ def booking_out(db: Session, booking: Booking, viewer: User) -> schemas.BookingO
         ),
         contact_phones=_contacts(booking, viewer),
         delivery_code_sms=notifications.latest_status(db, booking.id, SmsType.DELIVERY_CODE),
-        cancellation_pending=booking.cancellation_requested_at is not None,
+        cancellation_pending=(
+            booking.status == BookingStatus.PICKED_UP
+            and booking.cancellation_requested_at is not None
+        ),
         cancellation_reason=booking.cancellation_reason,
         can_rate=_can_rate(db, booking, viewer),
         payment=(

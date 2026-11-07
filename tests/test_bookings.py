@@ -215,6 +215,7 @@ def test_cancel_after_pickup_needs_reason_and_review(world, client):
     ).json()
     assert done["status"] == "CANCELLED"
     assert done["payment"]["status"] == "REFUNDED"
+    assert done["cancellation_pending"] is False
     assert client.get("/api/admin/cancellations", headers=admin["headers"]).json() == []
 
 

@@ -40,6 +40,9 @@ These exist after seeding, all with PIN `1234` (`DEMO_PIN`).
 **Errors** have one shape: `{"detail": "Readable message", "code": "MACHINE_CODE"}`.
 Validation failures (422) use FastAPI's usual list in `detail`.
 
+`/docs` shows a working example for every request and response, and every error `code` each
+route can return. They live in `app/api_docs.py`, and tests fail if they stop matching the API.
+
 **Money** is in integer minor units: `19000` means KES 190.00.
 
 **Times** come back in UTC. Show them in Africa/Nairobi. Times you send must include an
@@ -134,6 +137,7 @@ app/
   adapters/     SmsGateway, PaymentGateway and ObjectStorage, where provider detail lives
   models.py     Tables
   schemas.py    API contracts
+  api_docs.py   Examples and error responses shown in /docs
   presenters.py Response building, including the phone privacy rules
   seed.py       Labelled demo data
 ```

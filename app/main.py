@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app import api_docs
 from app.config import get_settings
 from app.db import SessionLocal, create_tables, startup_lock
 from app.errors import AppError, app_error_handler
@@ -31,6 +32,7 @@ app = FastAPI(
     title="Nelp API",
     version="0.1.0",
     summary="Choose a delivery rider by reputation, availability and service area.",
+    description=api_docs.DESCRIPTION,
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -44,3 +46,5 @@ app.add_exception_handler(AppError, app_error_handler)
 
 for module in (meta, auth, media, riders, bookings, misc, admin):
     app.include_router(module.router)
+
+api_docs.install(app)
