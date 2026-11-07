@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+import pytest
 from sqlalchemy import select
 
 from app.db import utcnow
@@ -103,3 +104,23 @@ def test_resend_replaces_the_code(world, client):
         assert response.status_code == 400
     response = client.post("/api/auth/confirm-phone", json={"code": new}, headers=user["headers"])
     assert response.status_code == 200
+
+
+@pytest.mark.parametrize(
+    "origin", ["http://localhost:5173", "http://127.0.0.1:3000", "https://any-site.example"]
+)
+def test_any_origin_can_call_the_api(client, origin):
+    simple = client.get("/health", headers={"Origin": origin})
+    assert simple.headers["access-control-allow-origin"] == "*"
+
+    preflight = client.options(
+        "/api/bookings",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type,idempotency-key",
+        },
+    )
+    assert preflight.status_code == 200
+    assert preflight.headers["access-control-allow-origin"] == "*"
+    assert "authorization" in preflight.headers["access-control-allow-headers"].lower()

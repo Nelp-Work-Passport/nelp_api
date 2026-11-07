@@ -11,6 +11,7 @@ os.environ["ENVIRONMENT"] = "test"
 os.environ["SMS_PROVIDER"] = "demo"
 os.environ["ANTHROPIC_API_KEY"] = ""
 os.environ["SEED_ON_STARTUP"] = "false"
+os.environ["CORS_ORIGINS"] = "*"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

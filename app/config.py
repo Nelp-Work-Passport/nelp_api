@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     environment: Literal["development", "test", "production"] = "development"
     database_url: str = "sqlite:///./nelp.db"
-    cors_origins: str = "http://localhost:3000,http://localhost:5173"
+    cors_origins: str = "*"  # any site; safe because auth uses bearer tokens, not cookies
     public_base_url: str = "http://localhost:3000"  # the front end; used in SMS links
     seed_on_startup: bool = False
 

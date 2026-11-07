@@ -57,14 +57,14 @@ below for the usual causes.
 | Never active, timeouts in the logs | Deployment is in a different workspace from the database | Recreate it in the database's workspace |
 | `access denied` TLS alert | A firewall policy on the database | Allow the client on port 5432 |
 | `/health` shows `storage_configured: false` | An S3 variable is missing | Set it, then redeploy |
-| Browser shows CORS errors | Front-end URL not allowed | Add it to `CORS_ORIGINS` |
+| Browser shows CORS errors | `CORS_ORIGINS` is not `*` on the deployment | Set it on the **Env** tab and redeploy |
 
 ## 5. Connect the front end
 
-Once the front end has a URL, set these on the **Env** tab and redeploy:
+`CORS_ORIGINS=*` lets any site call the API, including local development. Once the front
+end has a URL, set this on the **Env** tab and redeploy:
 
 ```
-CORS_ORIGINS=https://your-front-end-url
 PUBLIC_BASE_URL=https://your-front-end-url
 ```
 
@@ -91,6 +91,7 @@ Backups contain personal data, so keep them out of the repository.
 
 ## Before going live with real users
 
+- Replace `CORS_ORIGINS=*` with your front-end URL.
 - Set `SEED_ON_STARTUP=false` and remove the demo accounts, whose PIN is public.
 - Turn off the demo inbox by finishing the ThriveVas adapter.
 - The database password cannot be rotated from the console. If it has been shared
