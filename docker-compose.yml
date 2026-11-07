@@ -1,0 +1,26 @@
+# Local stack: the API on PostgreSQL. Secrets here are for local use only.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nelp
+      POSTGRES_PASSWORD: nelp
+      POSTGRES_DB: nelp
+    volumes:
+      - nelp_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nelp"]
+      interval: 3s
+      retries: 10
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://nelp:nelp@db:5432/nelp
+      SEED_ON_STARTUP: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  nelp_db:

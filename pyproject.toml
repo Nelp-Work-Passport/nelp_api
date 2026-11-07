@@ -1,9 +1,32 @@
 [project]
 name = "nelp-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "Backend API for Nelp, a trusted rider choice and delivery booking platform"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "anthropic>=2.6.0",
+    "argon2-cffi>=23.1",
+    "boto3>=1.43.126",
     "fastapi[standard]>=0.162.1",
+    "pillow>=13.0.0",
+    "psycopg[binary]>=3.2",
+    "pyjwt>=2.9",
+    "sqlalchemy>=2.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.4",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]  # FastAPI's Query() and Depends() defaults
